@@ -105,7 +105,7 @@ export class Visual implements IVisual {
     let yScale = d3
       .scaleLinear()
       .domain([0, viewModel.dataMax])
-      .rangeRound([0, height]);
+      .rangeRound([height, 0]);
 
     let xScale = d3
       .scaleTime()
