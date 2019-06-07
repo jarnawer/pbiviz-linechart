@@ -1,5 +1,7 @@
 # pbiviz-linechart
 
+This is a simple PowerBI Custom Visual to draw a Line Chart. Works with PowerBI Visual Tools v3.x
+
 Install pbiviz package:
 ```
 npm i -g powerbi-visuals-tools
