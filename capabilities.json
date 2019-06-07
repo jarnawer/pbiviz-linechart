@@ -1,13 +1,13 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
+            "displayName": "X Axis",
+            "name": "x_axis",
+            "kind": "Measure"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
+            "displayName": "Y Axis",
+            "name": "y_axis",
             "kind": "Measure"
         }
     ],
@@ -58,27 +58,14 @@
             }
         }
     },
-    "dataViewMappings": [
-        {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
-                    "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
-                }
+    "dataViewMappings": [{
+        "table": {
+            "rows": {
+               "select":[
+                   {"for":{"in":"x_axis"}},
+                   {"for":{"in":"y_axis"}}
+                ]
             }
         }
-    ]
+    }]
 }

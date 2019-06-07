@@ -35,10 +35,11 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
+
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
-import {viewModel} from './viewmodels/testData';
+import {visualTransform} from './core/dataTransform';
 import { VisualSettings } from "./settings";
-import { ChartDataPoint } from "./viewmodels/model";
+import { ChartDataPoint, ChartViewModel } from "./viewmodels/model";
 export class Visual implements IVisual {
   private settings: VisualSettings;
   private svg: d3.Selection<SVGElement, any, any, any>;
@@ -93,27 +94,25 @@ export class Visual implements IVisual {
    */
   public update(options: VisualUpdateOptions) {
 
-    // let width = options.viewport.width- this.margin.left - this.margin.right;
-    // let height = options.viewport.height - this.margin.top - this.margin.bottom;
-    
     let width = options.viewport.width;
     let height = options.viewport.height;
-    
+    let viewModel:ChartViewModel = visualTransform(options, this.host);    
+    let offset_x = height - this.margin.bottom - this.margin.top;
+    let offset_y = (this.margin.bottom + this.margin.top) * -1;
     this.svg.attr("width",width)
     this.svg.attr("height", height);
 
     let yScale = d3
       .scaleLinear()
       .domain([0, viewModel.dataMax])
-      .rangeRound([height, 0]);
+      .rangeRound([0, height]);
 
     let xScale = d3
       .scaleTime()
       .domain(d3.extent(viewModel.dataPoints, d => d.x_axis))
       .rangeRound([0, width]);
     
-      let offset_x = height - this.margin.bottom - this.margin.top;
-      let offset_y = (this.margin.bottom + this.margin.top) * -1;
+     
     this.yAxis
     .attr(
         "transform",
@@ -129,7 +128,7 @@ export class Visual implements IVisual {
       .call(d3.axisBottom(xScale))
      
     
-    this.handleLineUpdate(width, height, xScale, yScale);
+    this.handleLineUpdate(viewModel.dataPoints,offset_y, xScale, yScale);
   }
 
   private initLine(){
@@ -138,14 +137,18 @@ export class Visual implements IVisual {
     this.lineChart.append("text").attr("id", "lineChartLabel");
   }
 
-  private handleLineUpdate(height: number, width: number, xScale:d3.ScaleTime<number, number>,yScale: d3.ScaleLinear<number, any>) {
+  private handleLineUpdate(dataPoints:ChartDataPoint[],offset_y:number,xScale:d3.ScaleTime<number, number>,yScale: d3.ScaleLinear<number, any>) {
     
     var line = d3.line<ChartDataPoint>().x(d => xScale(d.x_axis)).y(d => yScale(d.y_axis));
-
+    console.log("datapoints->", dataPoints)
     this.lineChart
       .select("#lineChart")
-      .datum(viewModel.dataPoints)
-      .attr("d", line);
+      .datum(dataPoints)
+      .attr("d", line)
+      .attr(
+        "transform",
+        "translate(0," + offset_y + ")"
+      )
 
     this.lineChart
       .select("#lineChart")
