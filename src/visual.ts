@@ -27,11 +27,14 @@
 import "@babel/polyfill";
 import "./../style/visual.less";
 import powerbi from "powerbi-visuals-api";
+import * as svgUtils from "powerbi-visuals-utils-svgutils";
+import * as colorUtils from "powerbi-visuals-utils-colorutils";
 import * as d3 from "d3";
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import IColorPalette = powerbi.extensibility.IColorPalette;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
@@ -40,8 +43,12 @@ import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnume
 import {visualTransform} from './core/dataTransform';
 import { VisualSettings } from "./settings";
 import { ChartDataPoint, ChartViewModel } from "./viewmodels/model";
+
 export class Visual implements IVisual {
   private settings: VisualSettings;
+  private colorPalette:IColorPalette;
+  private colorHelper:colorUtils.ColorHelper;
+  
   private svg: d3.Selection<SVGElement, any, any, any>;
   private host: IVisualHost;
   private lineChartContainer: d3.Selection<SVGElement, any, any, any>;
@@ -75,13 +82,16 @@ export class Visual implements IVisual {
       .classed("container", true)
       .attr(
         "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
+        svgUtils.manipulation.translate(this.margin.left, this.margin.top)
       );
     this.lineChartContainer = this.container.append("g").classed("lineChart", true);
 
     this.xAxis = this.container.append("g").classed("xAxis", true);
     this.yAxis = this.container.append("g").classed("yAxis", true);
-        
+    
+    this.colorPalette = options.host.colorPalette;
+    this.colorHelper = new colorUtils.ColorHelper(this.colorPalette);
+
   }
   /**
    * Updates the state of the visual. Every sequential databinding and resize will call update.
@@ -104,25 +114,21 @@ export class Visual implements IVisual {
     let yScale = d3
       .scaleLinear()
       .domain([0, viewModel.dataMax])
-      .rangeRound([height, 0]);
+      .rangeRound([0, height - this.margin.top - this.margin.bottom]);
 
     let xScale = d3
       .scaleTime()
       .domain(d3.extent(viewModel.axis, d => d))
-      .rangeRound([0, width]);
+      .rangeRound([0, width - this.margin.left - this.margin.right]);
     
      
     this.yAxis
-    .attr(
-        "transform",
-        "translate(0," + (offset_y) + ")"
-      )
       .call(d3.axisLeft(yScale))
     
     this.xAxis
     .attr(
         "transform",
-        "translate(0," + offset_x + ")"
+        svgUtils.manipulation.translate(0, offset_x)
       )
       .call(d3.axisBottom(xScale))
      
@@ -150,7 +156,7 @@ export class Visual implements IVisual {
         .select(`#${lineId}`)
         .datum(element)
         .attr("d", line)
-        .attr("transform", "translate(0," + offset_y + ")");
+        // .attr("transform", svgUtils.manipulation.translate(0, offset_y))
 
       this.lineChartContainer
         .select(`#${lineId}`)
@@ -158,10 +164,10 @@ export class Visual implements IVisual {
         .attr("stroke", "steelblue")
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5);
+        .attr("stroke-width", 1.5)
     });
-      
-
+    
+    
  }
 
   private static parseSettings(dataView: DataView): VisualSettings {

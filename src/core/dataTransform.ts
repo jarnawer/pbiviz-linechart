@@ -37,6 +37,7 @@ import { dataPointSettings } from '../settings';
         let x_axis_values = dataView[0].categorical.categories[0].values
         let y_axis_values = dataView[0].categorical.values; 
         
+        
         y_axis_values.forEach((item,index)=>{
             viewModel.dataPoints[index] = item.values.map((itemValue,itemValueIndex)=>{
                 return {
