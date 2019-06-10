@@ -3,7 +3,7 @@
         {
             "displayName": "X Axis",
             "name": "x_axis",
-            "kind": "Measure"
+            "kind": "Grouping"
         },
         {
             "displayName": "Y Axis",
@@ -59,11 +59,13 @@
         }
     },
     "dataViewMappings": [{
-        "table": {
-            "rows": {
-               "select":[
-                   {"for":{"in":"x_axis"}},
-                   {"for":{"in":"y_axis"}}
+        "categorical": {
+            "categories": {
+                "for": { "in": "x_axis" }
+            },
+            "values": {
+                "select": [
+                    { "bind": { "to": "y_axis" } }
                 ]
             }
         }

@@ -16,28 +16,44 @@ import { dataPointSettings } from '../settings';
      */
     export function visualTransform(options: VisualUpdateOptions, host: IVisualHost): ChartViewModel {
         let dataView = options.dataViews;
+
         let viewModel: ChartViewModel = {
             dataPoints: [],
+            axis:[],
             dataMax: 0
         };
         
-        if (!dataView
-            || !dataView[0]
-            || !dataView[0].table
-            || !dataView[0].table.rows
-            )
-            return viewModel;
+        if (
+          !dataView ||
+          !dataView[0] ||
+          !dataView[0] ||
+          !dataView[0].categorical ||
+          !dataView[0].categorical.categories ||
+          !dataView[0].categorical.categories[0] ||
+          !dataView[0].categorical.values 
+        )
+          return viewModel;
         
-        let rows = dataView[0].table.rows;
-        let chartDataPoints: ChartDataPoint[] = rows.map((r)=>{
-            return {
-                x_axis:new Date(r[1] as string), y_axis:r[0] as number
-            } as ChartDataPoint
-        });
+        let x_axis_values = dataView[0].categorical.categories[0].values
+        let y_axis_values = dataView[0].categorical.values; 
+        
+        y_axis_values.forEach((item,index)=>{
+            viewModel.dataPoints[index] = item.values.map((itemValue,itemValueIndex)=>{
+                return {
+                    x_axis: new Date(x_axis_values[itemValueIndex] as string),
+                    y_axis:itemValue
+                } as ChartDataPoint
+            });
+        });   
+        viewModel.axis = x_axis_values;
+        viewModel.dataMax = d3.max(y_axis_values.map(y=>y.maxLocal as number));
+        
+        return viewModel;
+    }
 
-        
-        return {
-            dataPoints: chartDataPoints,
-            dataMax: d3.max(chartDataPoints.map(c=>c.y_axis))
-        };
+    function get_axis_value(value:any):any {
+        if(typeof(value)==="number"){
+            return value;
+        }
+        return new Date(value);
     }

@@ -44,7 +44,7 @@ export class Visual implements IVisual {
   private settings: VisualSettings;
   private svg: d3.Selection<SVGElement, any, any, any>;
   private host: IVisualHost;
-  private lineChart: d3.Selection<SVGElement, any, any, any>;
+  private lineChartContainer: d3.Selection<SVGElement, any, any, any>;
   private container: d3.Selection<SVGElement, any, any, any>;
   private xAxis: d3.Selection<SVGElement, any, any, any>;
   private yAxis: d3.Selection<SVGElement, any, any, any>;
@@ -77,12 +77,11 @@ export class Visual implements IVisual {
         "transform",
         "translate(" + this.margin.left + "," + this.margin.top + ")"
       );
-    
+    this.lineChartContainer = this.container.append("g").classed("lineChart", true);
 
     this.xAxis = this.container.append("g").classed("xAxis", true);
     this.yAxis = this.container.append("g").classed("yAxis", true);
-
-    this.initLine();
+        
   }
   /**
    * Updates the state of the visual. Every sequential databinding and resize will call update.
@@ -109,7 +108,7 @@ export class Visual implements IVisual {
 
     let xScale = d3
       .scaleTime()
-      .domain(d3.extent(viewModel.dataPoints, d => d.x_axis))
+      .domain(d3.extent(viewModel.axis, d => d))
       .rangeRound([0, width]);
     
      
@@ -128,35 +127,40 @@ export class Visual implements IVisual {
       .call(d3.axisBottom(xScale))
      
     
-    this.handleLineUpdate(viewModel.dataPoints,offset_y, xScale, yScale);
+    this.handleLineUpdate(viewModel,offset_y, xScale, yScale);
   }
 
-  private initLine(){
-    this.lineChart = this.container.append("g").classed("lineChart", true);
-    this.lineChart.append("path").attr("id", "lineChart");
-    this.lineChart.append("text").attr("id", "lineChartLabel");
-  }
 
-  private handleLineUpdate(dataPoints:ChartDataPoint[],offset_y:number,xScale:d3.ScaleTime<number, number>,yScale: d3.ScaleLinear<number, any>) {
+  private handleLineUpdate(plotData:ChartViewModel,offset_y:number,xScale:d3.ScaleTime<number, number>,yScale: d3.ScaleLinear<number, any>) {
     
-    var line = d3.line<ChartDataPoint>().x(d => xScale(d.x_axis)).y(d => yScale(d.y_axis));
-    console.log("datapoints->", dataPoints)
-    this.lineChart
-      .select("#lineChart")
-      .datum(dataPoints)
-      .attr("d", line)
-      .attr(
-        "transform",
-        "translate(0," + offset_y + ")"
-      )
+    this.lineChartContainer.selectAll("path").remove();
+    this.lineChartContainer.selectAll("text").remove();
 
-    this.lineChart
-      .select("#lineChart")
-      .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("stroke-width", 1.5);
+    plotData.dataPoints.forEach((element, index) => {
+      let lineId = `lineChart${index}`;
+      this.lineChartContainer.append("path").attr("id", lineId);
+      this.lineChartContainer.append("text").attr("id", `${lineId}Label`);
+
+      let line = d3
+        .line<ChartDataPoint>()
+        .x(d => xScale(d.x_axis))
+        .y(d => yScale(d.y_axis));
+
+      this.lineChartContainer
+        .select(`#${lineId}`)
+        .datum(element)
+        .attr("d", line)
+        .attr("transform", "translate(0," + offset_y + ")");
+
+      this.lineChartContainer
+        .select(`#${lineId}`)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5);
+    });
+      
 
  }
 

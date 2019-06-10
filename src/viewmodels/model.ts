@@ -1,5 +1,6 @@
 export interface ChartViewModel {
-    dataPoints: ChartDataPoint[];
+    dataPoints: ChartDataPoint[][];
+    axis:any[];
     dataMax: number;
 };
 export interface ChartDataPoint {
