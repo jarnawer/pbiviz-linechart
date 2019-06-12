@@ -28,13 +28,13 @@ import "@babel/polyfill";
 import "./../style/visual.less";
 import powerbi from "powerbi-visuals-api";
 import * as svgUtils from "powerbi-visuals-utils-svgutils";
-import * as colorUtils from "powerbi-visuals-utils-colorutils";
+
 import * as d3 from "d3";
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import IColorPalette = powerbi.extensibility.IColorPalette;
+
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
@@ -46,8 +46,7 @@ import { ChartDataPoint, ChartViewModel } from "./viewmodels/model";
 
 export class Visual implements IVisual {
   private settings: VisualSettings;
-  private colorPalette:IColorPalette;
-  private colorHelper:colorUtils.ColorHelper;
+
   
   private svg: d3.Selection<SVGElement, any, any, any>;
   private host: IVisualHost;
@@ -89,8 +88,6 @@ export class Visual implements IVisual {
     this.xAxis = this.container.append("g").classed("xAxis", true);
     this.yAxis = this.container.append("g").classed("yAxis", true);
     
-    this.colorPalette = options.host.colorPalette;
-    this.colorHelper = new colorUtils.ColorHelper(this.colorPalette);
 
   }
   /**
@@ -113,12 +110,12 @@ export class Visual implements IVisual {
 
     let yScale = d3
       .scaleLinear()
-      .domain([0, viewModel.dataMax])
+      .domain([0, viewModel.max_y])
       .rangeRound([0, height - this.margin.top - this.margin.bottom]);
 
     let xScale = d3
-      .scaleTime()
-      .domain(d3.extent(viewModel.axis, d => d))
+      .scaleLinear()
+      .domain([0, viewModel.max_x])
       .rangeRound([0, width - this.margin.left - this.margin.right]);
     
      
@@ -137,7 +134,7 @@ export class Visual implements IVisual {
   }
 
 
-  private handleLineUpdate(plotData:ChartViewModel,offset_y:number,xScale:d3.ScaleTime<number, number>,yScale: d3.ScaleLinear<number, any>) {
+  private handleLineUpdate(plotData:ChartViewModel,offset_y:number,xScale:d3.ScaleLinear<number, number>,yScale: d3.ScaleLinear<number, any>) {
     
     this.lineChartContainer.selectAll("path").remove();
     this.lineChartContainer.selectAll("text").remove();
@@ -161,7 +158,7 @@ export class Visual implements IVisual {
       this.lineChartContainer
         .select(`#${lineId}`)
         .attr("fill", "none")
-        .attr("stroke", "steelblue")
+        .attr("stroke", plotData.color[index])
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.5)

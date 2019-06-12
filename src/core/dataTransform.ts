@@ -2,8 +2,10 @@ import * as d3 from 'd3';
 import powerbi from "powerbi-visuals-api";
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import ColorPalette = powerbi.extensibility.IColorPalette;
 import { ChartViewModel, ChartDataPoint } from "../viewmodels/model";
 import { dataPointSettings } from '../settings';
+import * as colorUtils from "powerbi-visuals-utils-colorutils";
 
 /**
      * Function that converts queried data into a view model that will be used by the visual
@@ -16,11 +18,14 @@ import { dataPointSettings } from '../settings';
      */
     export function visualTransform(options: VisualUpdateOptions, host: IVisualHost): ChartViewModel {
         let dataView = options.dataViews;
-
+        let colorPalette:ColorPalette = host.colorPalette;
+        let colorHelper = new colorUtils.ColorHelper(colorPalette);
+        console.log(dataView);
         let viewModel: ChartViewModel = {
             dataPoints: [],
-            axis:[],
-            dataMax: 0
+            max_x:0,
+            max_y: 0,
+            color:[]
         };
         
         if (
@@ -41,13 +46,14 @@ import { dataPointSettings } from '../settings';
         y_axis_values.forEach((item,index)=>{
             viewModel.dataPoints[index] = item.values.map((itemValue,itemValueIndex)=>{
                 return {
-                    x_axis: new Date(x_axis_values[itemValueIndex] as string),
+                    x_axis:itemValueIndex,
                     y_axis:itemValue
                 } as ChartDataPoint
             });
+            viewModel.color[index] = getColor(index);
         });   
-        viewModel.axis = x_axis_values;
-        viewModel.dataMax = d3.max(y_axis_values.map(y=>y.maxLocal as number));
+        viewModel.max_x = x_axis_values.length;
+        viewModel.max_y = d3.max(y_axis_values.map(y=>y.maxLocal as number));
         
         return viewModel;
     }
@@ -57,4 +63,17 @@ import { dataPointSettings } from '../settings';
             return value;
         }
         return new Date(value);
+    }
+
+    function getColor(index:number){
+        switch(index){
+            case 0:
+                return "#FE8200";
+            case 1:
+                return "#041E42";
+            case 2:
+                return "#C3D5AB";
+            default:
+                return "#000000"
+        }
     }

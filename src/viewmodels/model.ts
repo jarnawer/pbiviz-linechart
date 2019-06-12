@@ -1,7 +1,8 @@
 export interface ChartViewModel {
     dataPoints: ChartDataPoint[][];
-    axis:any[];
-    dataMax: number;
+    max_x: number;
+    max_y:number;
+    color:string[];
 };
 export interface ChartDataPoint {
     y_axis: number;
