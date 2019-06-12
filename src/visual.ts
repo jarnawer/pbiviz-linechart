@@ -153,7 +153,7 @@ export class Visual implements IVisual {
         .select(`#${lineId}`)
         .datum(element)
         .attr("d", line)
-        // .attr("transform", svgUtils.manipulation.translate(0, offset_y))
+        
 
       this.lineChartContainer
         .select(`#${lineId}`)
