@@ -14,6 +14,6 @@
         ]
     },
     "files": [
-        "./src/visual.ts","node_modules/powerbi-visuals-utils-tooltiputils/lib/index.d.ts"
+        "./src/visual.ts"
     ]
 }
