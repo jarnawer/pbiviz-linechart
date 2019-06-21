@@ -44,17 +44,25 @@ import * as colorUtils from "powerbi-visuals-utils-colorutils";
         
         
         y_axis_values.forEach((item,index)=>{
-            viewModel.dataPoints[index] = item.values.map((itemValue,itemValueIndex)=>{
-                return {
-                    x_axis:itemValueIndex,
-                    y_axis:itemValue
-                } as ChartDataPoint
+            viewModel.dataPoints[index] = [];
+            for(var i=0;i<=item.values.length;i++){
+                let y_value =  item.values[i];
+                if(y_value){
+                    viewModel.dataPoints[index].push({
+                        x_axis: x_axis_values[i],
+                        y_axis: item.values[i]
+                    } as ChartDataPoint)
+                }
+            }
+            viewModel.dataPoints[index].sort(function(x, y){
+                return d3.ascending(x.x_axis, y.x_axis);
             });
+            
             viewModel.color[index] = getColor(index);
         });   
-        viewModel.max_x = x_axis_values.length;
+        viewModel.max_x = d3.max(x_axis_values.map(x=>x as number));
         viewModel.max_y = d3.max(y_axis_values.map(y=>y.maxLocal as number));
-        
+        console.log("viewmodel", viewModel)
         return viewModel;
     }
 
@@ -68,11 +76,11 @@ import * as colorUtils from "powerbi-visuals-utils-colorutils";
     function getColor(index:number){
         switch(index){
             case 0:
-                return "#FE8200";
+                return "#E4002B";
             case 1:
-                return "#041E42";
+                return "#001BFF";
             case 2:
-                return "#C3D5AB";
+                return "#FE8200";
             default:
                 return "#000000"
         }

@@ -55,6 +55,7 @@ export class Visual implements IVisual {
   private xAxis: d3.Selection<SVGElement, any, any, any>;
   private yAxis: d3.Selection<SVGElement, any, any, any>;
   private margin:any;
+  private IT
   static Config = {
     xScalePadding: 0.1
   };
@@ -153,7 +154,8 @@ export class Visual implements IVisual {
         .select(`#${lineId}`)
         .datum(element)
         .attr("d", line)
-        
+      
+      
 
       this.lineChartContainer
         .select(`#${lineId}`)
@@ -161,7 +163,7 @@ export class Visual implements IVisual {
         .attr("stroke", plotData.color[index])
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 5)
     });
     
     

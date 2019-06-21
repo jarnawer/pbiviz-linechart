@@ -3,12 +3,28 @@
         {
             "displayName": "X Axis",
             "name": "x_axis",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "requiredTypes": [
+                {
+                    "numeric": true
+                },
+                {
+                    "integer": true
+                }
+            ]
         },
         {
             "displayName": "Y Axis",
             "name": "y_axis",
-            "kind": "Measure"
+            "kind": "Measure",
+            "requiredTypes": [
+                {
+                    "numeric": true
+                },
+                {
+                    "integer": true
+                }
+            ]
         }
     ],
     "objects": {
@@ -61,13 +77,31 @@
     "dataViewMappings": [{
         "categorical": {
             "categories": {
-                "for": { "in": "x_axis" }
+                "for": { "in": "x_axis" },
+                "dataReductionAlgorithm": {
+                    "top": {
+                        "count": 30000
+                    }
+                }
             },
             "values": {
                 "select": [
-                    { "bind": { "to": "y_axis" } }
-                ]
+                    { "for": { "in": "y_axis" } }
+                ],"dataReductionAlgorithm": {
+                    "top": {
+                        "count": 30000
+                    }
+                }
             }
         }
-    }]
+    }],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": [
+            "tooltips"
+        ]
+    }
 }
