@@ -136,11 +136,11 @@ export class Visual implements IVisual {
 
 
   private handleLineUpdate(plotData:ChartViewModel,offset_y:number,xScale:d3.ScaleLinear<number, number>,yScale: d3.ScaleLinear<number, any>) {
-    
+    //reversing data in order to apply top z-index priority from first to last elements
     this.lineChartContainer.selectAll("path").remove();
     this.lineChartContainer.selectAll("text").remove();
-
-    plotData.dataPoints.forEach((element, index) => {
+    console.log("plotData", plotData);
+    plotData.dataPoints.reverse().forEach((element, index) => {
       let lineId = `lineChart${index}`;
       this.lineChartContainer.append("path").attr("id", lineId);
       this.lineChartContainer.append("text").attr("id", `${lineId}Label`);
@@ -160,7 +160,7 @@ export class Visual implements IVisual {
       this.lineChartContainer
         .select(`#${lineId}`)
         .attr("fill", "none")
-        .attr("stroke", plotData.color[index])
+        .attr("stroke", plotData.color.reverse()[index])
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 5)
